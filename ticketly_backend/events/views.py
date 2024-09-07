@@ -4,10 +4,15 @@ from .models import Event, TicketTier
 from .serializers import EventSerializer, TicketTierSerializer
 
 # CREATE and LIST Events
-class EventListCreateView(generics.ListCreateAPIView):
+class EventListView(generics.ListAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [AllowAny]
+    
+class EventCreateView(generics.CreateAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    permission_classes = [IsAuthenticated]
 
 # RETRIEVE, UPDATE, and DELETE Event
 class EventRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):

@@ -7,6 +7,7 @@ import {
   faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { logoutUser } from "../services/api"; // Import logout function
+import { Link } from "react-router-dom";
 
 const Navbar = ({
   toggleDarkMode,
@@ -27,7 +28,9 @@ const Navbar = ({
 
   return (
     <nav className="flex justify-between items-center p-4 bg-light-background dark:bg-dark-background">
-      <div className="text-xl font-bold">Ticketly</div>
+      <Link to="/" className="text-xl">
+        <div className="text-2xl font-bold">Ticketly</div>
+      </Link>
       <div className="flex items-center space-x-4">
         <button
           onClick={toggleDarkMode}

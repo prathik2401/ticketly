@@ -12,7 +12,17 @@ const App = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // On initial load, check localStorage for theme preference
   useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme === "dark") {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    }
+
     const verifyAuth = async () => {
       try {
         await checkAuthStatus();
@@ -27,10 +37,12 @@ const App = () => {
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.remove("dark");
-    } else {
+    if (!isDarkMode) {
       document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
   };
 
@@ -41,14 +53,14 @@ const App = () => {
   const closeAuthModal = () => {
     setIsAuthModalOpen(false);
   };
-  
+
   const handleLogin = () => {
     setIsLoggedIn(true);
-  }
+  };
+
   const handleLogout = () => {
     setIsLoggedIn(false);
   };
-
 
   return (
     <div
@@ -66,17 +78,15 @@ const App = () => {
           openAuthModal={openAuthModal}
           handleLogout={handleLogout}
         />
-
-        {/* Apply blur to the background content only */}
         <div className={`${isAuthModalOpen ? "blur-sm" : ""}`}>
           <Routes>
             <Route path="/" element={<EventList />} />
             <Route path="/events/:eventId" element={<EventDetails />} />
           </Routes>
         </div>
-
-        {/* Login modal overlay */}
-        {isAuthModalOpen && <LoginModal closeAuthModal={closeAuthModal} onLogin={handleLogin}/>}
+        {isAuthModalOpen && (
+          <LoginModal closeAuthModal={closeAuthModal} onLogin={handleLogin} />
+        )}
       </Router>
     </div>
   );
