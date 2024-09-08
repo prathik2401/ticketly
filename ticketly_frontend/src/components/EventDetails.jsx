@@ -32,7 +32,7 @@ const EventDetails = () => {
           }
         } else {
           console.error("Error fetching event details:", err);
-          setError("Failed to load event details. Please try again later.");
+          setError("Failed to load event details. Log In to create an event.");
         }
       } finally {
         setLoading(false);

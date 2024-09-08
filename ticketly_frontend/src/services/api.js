@@ -91,7 +91,24 @@ export const checkAuthStatus = async () => {
 
 // Logout
 export const logoutUser = async () => {
-  await api.post("/api/logout/");
+  const token = localStorage.getItem("token");
+  const refreshToken = localStorage.getItem("refreshToken");
+  console.log(token, refreshToken);
+  if (!token || !refreshToken) {
+    throw new Error("No tokens found");
+  }
+  await api.post(
+    "/api/logout/",
+    { refresh_token: refreshToken },
+    {
+      // Pass refresh token in request body
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
 };
 
 // Fetch list of events
@@ -117,9 +134,24 @@ export const getEventDetails = async (eventId) => {
   }
 };
 
-
-// Book tickets for an event
 export const bookTickets = async (eventId, bookingData) => {
   const response = await api.post(`/events/${eventId}/book/`, bookingData);
+  return response.data;
+};
+
+export const createEvent = async (eventData, token) => {
+  const response = await api.post("/events/", eventData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${localStorage.getItem("token")}`, // Add the token to the headers
+    },
+  });
+  return response.data;
+};
+
+export const createTicketTiers = async (ticketTiers) => {
+  const response = await api.post("/ticket-tiers/", {
+    ticket_tiers: ticketTiers,
+  });
   return response.data;
 };

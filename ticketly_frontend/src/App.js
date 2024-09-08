@@ -4,6 +4,7 @@ import EventList from "./components/EventList";
 import EventDetails from "./components/EventDetails";
 import Navbar from "./components/Navbar";
 import LoginModal from "./components/LoginModal";
+import OrganizerPage from "./components/OrganizerPage";
 import { checkAuthStatus } from "./services/api";
 import "./App.css";
 
@@ -84,6 +85,7 @@ const App = () => {
               element={<EventList openAuthModal={openAuthModal} />}
             />
             <Route path="/events/:eventId" element={<EventDetails />} />
+            <Route path="/organizer" element={<OrganizerPage />} />
           </Routes>
         </div>
         {isAuthModalOpen && (
