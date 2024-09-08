@@ -11,8 +11,11 @@ const EventDetails = () => {
   const [ticketCount, setTicketCount] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [bookingError, setBookingError] = useState(null);
 
   useEffect(() => {
+    if (!eventId) return;
+
     const fetchEventDetails = async () => {
       try {
         const eventData = await getEventDetails(eventId);
@@ -40,12 +43,19 @@ const EventDetails = () => {
   }, [eventId]);
 
   const handleBooking = async () => {
+    if (ticketCount <= 0 || ticketCount > event.availableTickets) {
+      setBookingError("Please enter a valid number of tickets.");
+      return;
+    }
+
     try {
       const bookingData = { number_of_tickets: ticketCount };
       await bookTickets(eventId, bookingData);
       alert("Tickets booked successfully!");
+      setBookingError(null); // Clear any previous booking errors
     } catch (error) {
       console.error("Error booking tickets:", error);
+      setBookingError("Failed to book tickets. Please try again.");
     }
   };
 
@@ -55,7 +65,7 @@ const EventDetails = () => {
       return `${S3_BUCKET_URL}${url.pathname}`;
     } catch (error) {
       console.error("Invalid URL:", imageUrl);
-      return imageUrl;
+      return "/fallback-image.jpg"; // Use a fallback image if URL is invalid
     }
   };
 
@@ -114,16 +124,21 @@ const EventDetails = () => {
               <input
                 type="number"
                 min="1"
+                max={event.availableTickets}
                 value={ticketCount}
                 onChange={(e) => setTicketCount(e.target.value)}
                 className="w-full px-4 py-3 border border-light-primary dark:border-dark-primary text-dark-primary dark:text-dark-buttonText bg-light-background dark:bg-dark-background rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
               />
+              {bookingError && (
+                <p className="text-red-500 mt-2">{bookingError}</p>
+              )}
             </div>
             <button
               onClick={handleBooking}
               className="w-full bg-light-buttonBackground dark:bg-dark-buttonBackground text-light-buttonText dark:text-dark-buttonText font-bold py-3 px-4 rounded-md hover:bg-light-primary dark:hover:bg-dark-primary focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-200 ease-in-out transform hover:scale-105"
+              disabled={event.availableTickets === 0}
             >
-              Book Tickets
+              {event.availableTickets > 0 ? "Book Tickets" : "Sold Out"}
             </button>
           </div>
         </div>

@@ -12,7 +12,6 @@ const App = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // On initial load, check localStorage for theme preference
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
     if (storedTheme === "dark") {
@@ -80,7 +79,10 @@ const App = () => {
         />
         <div className={`${isAuthModalOpen ? "blur-sm" : ""}`}>
           <Routes>
-            <Route path="/" element={<EventList />} />
+            <Route
+              path="/"
+              element={<EventList openAuthModal={openAuthModal} />}
+            />
             <Route path="/events/:eventId" element={<EventDetails />} />
           </Routes>
         </div>

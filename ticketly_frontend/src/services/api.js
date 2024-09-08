@@ -7,7 +7,6 @@ const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
 });
 
-// Set up an interceptor to attach the token to every request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -19,9 +18,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Authentication
-
-// Sign Up
 export const registerUser = async (email, password) => {
   const response = await api.post("/api/register/", {
     email: email,
@@ -30,8 +26,6 @@ export const registerUser = async (email, password) => {
   return response.data;
 };
 
-// Login
-// src/services/api.js
 export const loginUser = async (username, password) => {
   try {
     const response = await api.post("/api/token/", {
@@ -62,14 +56,12 @@ export const refreshToken = async () => {
   }
 };
 
-
 // Auth Status
 export const checkAuthStatus = async () => {
   const token = localStorage.getItem("token");
   if (!token) {
     throw new Error("No token found");
   }
-
   try {
     const response = await api.get("/api/verify-token/", {
       headers: {
@@ -97,7 +89,6 @@ export const checkAuthStatus = async () => {
   }
 };
 
-
 // Logout
 export const logoutUser = async () => {
   await api.post("/api/logout/");
@@ -110,10 +101,22 @@ export const getEvents = async () => {
 };
 
 // Fetch event details
+// Fetch event details - prompt for login if unauthorized
 export const getEventDetails = async (eventId) => {
-  const response = await api.get(`/events/${eventId}/`);
-  return response.data;
+  try {
+    const response = await api.get(`/events/${eventId}/`);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      // Trigger login prompt when unauthorized
+      throw new Error("Unauthorized - Please log in to view this event.");
+    } else {
+      console.error("Error fetching event details:", error);
+      throw error;
+    }
+  }
 };
+
 
 // Book tickets for an event
 export const bookTickets = async (eventId, bookingData) => {

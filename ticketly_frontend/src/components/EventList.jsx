@@ -1,14 +1,18 @@
-import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { getEvents } from "../services/api";
 import EventCard from "./EventCard";
+import LoginModal from "./LoginModal";
 
 const S3_BUCKET_URL = process.env.REACT_APP_S3_BUCKET_URL;
 
 const EventList = () => {
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [redirectAfterLogin, setRedirectAfterLogin] = useState(null);
   const hasFetchedEvents = useRef(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -41,6 +45,28 @@ const EventList = () => {
     );
   });
 
+  const checkAuthentication = () => {
+    return localStorage.getItem("token"); // Adjust based on how you handle authentication
+  };
+
+  const handleEventClick = (eventId) => {
+    if (checkAuthentication()) {
+      // User is authenticated, navigate directly to the event details
+      navigate(`/events/${eventId}`);
+    } else {
+      // User is not authenticated, open the login modal
+      setRedirectAfterLogin(`/events/${eventId}`);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleLogin = () => {
+    if (redirectAfterLogin) {
+      navigate(redirectAfterLogin);
+      setRedirectAfterLogin(null);
+    }
+  };
+
   return (
     <div className="container mx-auto">
       <div className="flex justify-left mb-8">
@@ -59,7 +85,7 @@ const EventList = () => {
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event) => (
             <li key={event.id} className="w-full">
-              <Link to={`/events/${event.id}`}>
+              <div onClick={() => handleEventClick(event.id)}>
                 <EventCard
                   name={event.name}
                   location={event.location}
@@ -68,13 +94,20 @@ const EventList = () => {
                     "en-US"
                   )}
                 />
-              </Link>
+              </div>
             </li>
           ))
         ) : (
           <div className="text-center text-gray-500">No events found.</div>
         )}
       </ul>
+
+      {isModalOpen && (
+        <LoginModal
+          closeAuthModal={() => setIsModalOpen(false)}
+          onLogin={handleLogin}
+        />
+      )}
     </div>
   );
 };
