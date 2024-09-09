@@ -1,15 +1,31 @@
-// src/services/api.js
-
 import axios from "axios";
+import { refreshToken } from "./accounts/api"; // Adjust based on your file structure
 
-// Create an Axios instance with the base URL from .env
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: process.env.REACT_APP_API_URL + "api",
+  timeout: 5000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -18,140 +34,51 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export const registerUser = async (email, password) => {
-  const response = await api.post("/api/register/", {
-    email: email,
-    password: password,
-  });
-  return response.data;
-};
-
-export const loginUser = async (username, password) => {
-  try {
-    const response = await api.post("/api/token/", {
-      username: username,
-      password: password,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Login failed", error.response.data);
-    throw error;
-  }
-};
-
-export const refreshToken = async () => {
-  const refreshToken = localStorage.getItem("refreshToken");
-  try {
-    const response = await api.post("/api/token/refresh/", {
-      refresh: refreshToken,
-    });
-    localStorage.setItem("token", response.data.access); // Update access token
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error refreshing token:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-};
-
-// Auth Status
-export const checkAuthStatus = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("No token found");
-  }
-  try {
-    const response = await api.get("/api/verify-token/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+api.interceptors.response.use(
+  (response) => {
     return response;
-  } catch (error) {
-    if (error.response?.status === 401) {
-      // Attempt to refresh token
-      await refreshToken();
-      // Retry checking auth status
-      const retryResponse = await api.get("/api/verify-token/", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      return retryResponse;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response.status === 401 && !originalRequest._retry) {
+      if (error.response.data.code === "token_not_valid") {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          originalRequest._retry = true;
+
+          try {
+            const newAccessToken = await refreshToken(); // Refresh token API call
+            localStorage.setItem("access", newAccessToken);
+
+            api.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
+            processQueue(null, newAccessToken);
+
+            return api(originalRequest); // Retry original request with new token
+          } catch (refreshError) {
+            processQueue(refreshError, null);
+            return Promise.reject(refreshError);
+          } finally {
+            isRefreshing = false;
+          }
+        }
+
+        // Queue the failed request and retry once the token is refreshed
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
     }
-    console.error(
-      "Error verifying token:",
-      error.response?.data || error.message
-    );
-    throw error;
+
+    return Promise.reject(error);
   }
-};
+);
 
-// Logout
-export const logoutUser = async () => {
-  const token = localStorage.getItem("token");
-  const refreshToken = localStorage.getItem("refreshToken");
-  console.log(token, refreshToken);
-  if (!token || !refreshToken) {
-    throw new Error("No tokens found");
-  }
-  await api.post(
-    "/api/logout/",
-    { refresh_token: refreshToken },
-    {
-      // Pass refresh token in request body
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-};
-
-// Fetch list of events
-export const getEvents = async () => {
-  const response = await api.get("/events/");
-  return response.data;
-};
-
-// Fetch event details
-// Fetch event details - prompt for login if unauthorized
-export const getEventDetails = async (eventId) => {
-  try {
-    const response = await api.get(`/events/${eventId}/`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.status === 401) {
-      // Trigger login prompt when unauthorized
-      throw new Error("Unauthorized - Please log in to view this event.");
-    } else {
-      console.error("Error fetching event details:", error);
-      throw error;
-    }
-  }
-};
-
-export const bookTickets = async (eventId, bookingData) => {
-  const response = await api.post(`/events/${eventId}/book/`, bookingData);
-  return response.data;
-};
-
-export const createEvent = async (eventData, token) => {
-  const response = await api.post("/events/", eventData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${localStorage.getItem("token")}`, // Add the token to the headers
-    },
-  });
-  return response.data;
-};
-
-export const createTicketTiers = async (ticketTiers) => {
-  const response = await api.post("/ticket-tiers/", {
-    ticket_tiers: ticketTiers,
-  });
-  return response.data;
-};
+export default api;

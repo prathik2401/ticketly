@@ -1,45 +1,33 @@
-from rest_framework import generics
-from rest_framework.exceptions import ValidationError
-from .models import Booking, Event
-from .serializers import BookingSerializer
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
-from django.db import transaction
+from rest_framework.response import Response
+from .models import Booking
+from .serializers import BookingSerializer
+from events.models import Event
 
-from django.db import transaction
-
-class BookingListCreateView(generics.ListCreateAPIView):
-    queryset = Booking.objects.all()
+class CreateBookingView(generics.CreateAPIView):
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
 
-    @transaction.atomic
-    def perform_create(self, serializer):
-        user = self.request.user
-        event_id = self.request.data.get('event')
-        
+    def post(self, request, *args, **kwargs):
+        event_id = kwargs.get('event_id')  # Extract event_id from URL parameters
         try:
+            # Check if the event exists
             event = Event.objects.get(id=event_id)
         except Event.DoesNotExist:
-            raise ValidationError("The event does not exist.")
-        
-        if user.userprofile.is_host and event.user == user:
-            raise ValidationError("You cannot book tickets for your own event.")
-        
-        number_of_tickets = serializer.validated_data['number_of_tickets']
-        ticket_tiers = event.tickettier_set.all()
-        
-        for tier in ticket_tiers:
-            if tier.available_tickets >= number_of_tickets:
-                tier.available_tickets -= number_of_tickets
-                tier.save()
-                break
-        else:
-            raise ValidationError("Not enough tickets available.")
-        
-        serializer.save(user=user)
+            return Response({"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND)
 
-# RETRIEVE, UPDATE, and DELETE Booking
-class BookingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
-    permission_classes = [IsAuthenticated]
+        number_of_tickets = request.data.get('number_of_tickets')
+        if number_of_tickets is None or number_of_tickets <= 0:
+            return Response({"error": "Invalid number of tickets"}, status=status.HTTP_400_BAD_REQUEST)
+
+        data = {
+            'user': request.user.id,
+            'event': event_id,
+            'number_of_tickets': number_of_tickets
+        }
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Booking created successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

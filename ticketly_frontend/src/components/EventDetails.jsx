@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getEventDetails, bookTickets, refreshToken } from "../services/api";
-import { FaSpinner } from "react-icons/fa"; // Loading Spinner
+import { fetchEventDetails } from "../services/events/api";
+import { refreshToken } from "../services/accounts/api";
+import { bookEvent } from "../services/bookings/api";
+import { FaSpinner } from "react-icons/fa";
 
 const S3_BUCKET_URL = process.env.REACT_APP_S3_BUCKET_URL;
 
@@ -16,15 +18,21 @@ const EventDetails = () => {
   useEffect(() => {
     if (!eventId) return;
 
-    const fetchEventDetails = async () => {
+    const getEventDetails = async () => {
       try {
-        const eventData = await getEventDetails(eventId);
+        const accessToken = localStorage.getItem("access");
+        if (!accessToken) {
+          setError("Please log in to view event details.");
+          return;
+        }
+
+        const eventData = await fetchEventDetails(eventId);
         setEvent(eventData);
       } catch (err) {
         if (err.response?.status === 401) {
           try {
             await refreshToken();
-            const eventData = await getEventDetails(eventId);
+            const eventData = await fetchEventDetails(eventId);
             setEvent(eventData);
           } catch (refreshError) {
             console.error("Error refreshing token:", refreshError);
@@ -39,7 +47,7 @@ const EventDetails = () => {
       }
     };
 
-    fetchEventDetails();
+    getEventDetails();
   }, [eventId]);
 
   const handleBooking = async () => {
@@ -50,7 +58,7 @@ const EventDetails = () => {
 
     try {
       const bookingData = { number_of_tickets: ticketCount };
-      await bookTickets(eventId, bookingData);
+      await bookEvent(eventId, bookingData);
       alert("Tickets booked successfully!");
       setBookingError(null); // Clear any previous booking errors
     } catch (error) {
@@ -65,7 +73,7 @@ const EventDetails = () => {
       return `${S3_BUCKET_URL}${url.pathname}`;
     } catch (error) {
       console.error("Invalid URL:", imageUrl);
-      return "/fallback-image.jpg"; // Use a fallback image if URL is invalid
+      return null; // Return null if URL is invalid
     }
   };
 
@@ -81,11 +89,17 @@ const EventDetails = () => {
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       <div className="relative w-full h-96">
-        <img
-          src={getS3ImageUrl(event.image)}
-          alt={event.name}
-          className="w-full h-full object-cover rounded-lg shadow-lg"
-        />
+        {event.image ? (
+          <img
+            src={getS3ImageUrl(event.image)}
+            alt={event.name}
+            className="w-full h-full object-cover rounded-lg shadow-lg"
+          />
+        ) : (
+          <div className="w-full h-full flex justify-center items-center bg-gray-200 rounded-lg shadow-lg">
+            <span className="text-gray-500">No Image Available</span>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
         <h1 className="absolute bottom-6 left-6 text-5xl font-extrabold text-white drop-shadow-lg">
           {event.name}

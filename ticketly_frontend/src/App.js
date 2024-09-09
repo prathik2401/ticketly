@@ -4,14 +4,13 @@ import EventList from "./components/EventList";
 import EventDetails from "./components/EventDetails";
 import Navbar from "./components/Navbar";
 import LoginModal from "./components/LoginModal";
-import OrganizerPage from "./components/OrganizerPage";
-import { checkAuthStatus } from "./services/api";
+import api from "./services/api";
 import "./App.css";
 
 const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
@@ -23,16 +22,15 @@ const App = () => {
       document.documentElement.classList.remove("dark");
     }
 
-    const verifyAuth = async () => {
-      try {
-        await checkAuthStatus();
-        setIsLoggedIn(true);
-      } catch (error) {
-        setIsLoggedIn(false);
-      }
-    };
-
-    verifyAuth();
+    const accessToken = localStorage.getItem("access");
+    if (accessToken) {
+      api
+        .post("/accounts/verify-token/", { token: accessToken })
+        .then(() => setIsLoggedIn(true))
+        .catch(() => setShowLoginModal(true));
+    } else {
+      setShowLoginModal(true);
+    }
   }, []);
 
   const toggleDarkMode = () => {
@@ -46,20 +44,16 @@ const App = () => {
     }
   };
 
-  const openAuthModal = () => {
-    setIsAuthModalOpen(true);
-  };
-
-  const closeAuthModal = () => {
-    setIsAuthModalOpen(false);
-  };
-
   const handleLogin = () => {
     setIsLoggedIn(true);
+    setShowLoginModal(false);
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
     setIsLoggedIn(false);
+    setShowLoginModal(true);
   };
 
   return (
@@ -75,22 +69,22 @@ const App = () => {
           toggleDarkMode={toggleDarkMode}
           isDarkMode={isDarkMode}
           isLoggedIn={isLoggedIn}
-          openAuthModal={openAuthModal}
+          openAuthModal={() => setShowLoginModal(true)} // Pass the openAuthModal function
           handleLogout={handleLogout}
         />
-        <div className={`${isAuthModalOpen ? "blur-sm" : ""}`}>
+        {showLoginModal && (
+          <LoginModal
+            closeAuthModal={() => setShowLoginModal(false)}
+            onLogin={handleLogin}
+          />
+        )}
+        <div>
           <Routes>
-            <Route
-              path="/"
-              element={<EventList openAuthModal={openAuthModal} />}
-            />
-            <Route path="/events/:eventId" element={<EventDetails />} />
-            <Route path="/organizer" element={<OrganizerPage />} />
+            <Route path="/" element={<EventList />} />
+            <Route path="/events/:eventId" element={<EventDetails />} />{" "}
+            {/* Dynamic Route for Event Details */}
           </Routes>
         </div>
-        {isAuthModalOpen && (
-          <LoginModal closeAuthModal={closeAuthModal} onLogin={handleLogin} />
-        )}
       </Router>
     </div>
   );

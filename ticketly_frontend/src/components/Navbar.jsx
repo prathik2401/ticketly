@@ -6,7 +6,7 @@ import {
   faUserCircle,
   faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
-import { logoutUser } from "../services/api"; // Import logout function
+import { logoutUser } from "../services/accounts/api";
 import { Link } from "react-router-dom";
 
 const Navbar = ({

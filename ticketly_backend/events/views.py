@@ -1,52 +1,49 @@
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Event, TicketTier
-from .serializers import EventSerializer, TicketTierSerializer
-
-# CREATE and LIST Events
-from rest_framework import generics
-from rest_framework.permissions import AllowAny
-from .models import Event
-from .serializers import EventSerializer
-
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Event
-from .serializers import EventSerializer
+from .serializers import EventListSerializer, EventDetailSerializer, EventSerializer
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import PermissionDenied
 
-# CREATE and LIST Events
-class EventListCreateView(generics.ListCreateAPIView):
+class EventPagination(PageNumberPagination):
+    page_size = 30 
+
+class ListEventsView(generics.ListAPIView):
+    serializer_class = EventListSerializer
     queryset = Event.objects.all()
-    serializer_class = EventSerializer
+    pagination_class = EventPagination
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
-    # Allow anyone to view the events but only authenticated users to create events
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAuthenticated()]
+class EventDetailView(generics.RetrieveAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventDetailSerializer
+    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        queryset = Event.objects.all()
-        search_term = self.request.query_params.get('search', None)
-        if search_term:
-            queryset = queryset.filter(name__icontains=search_term) | queryset.filter(description__icontains=search_term)
-        return queryset
+class CreateEventView(generics.CreateAPIView):
+    serializer_class = EventSerializer
+    permission_classes = [IsAuthenticated]
 
-
-# RETRIEVE, UPDATE, and DELETE Event
-class EventRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    def perform_create(self, serializer):
+        user = self.request.user
+        event = serializer.save(user=user)
+        user.isHost = True
+        user.save()
+        return Response({"message": "Event created successfully"}, status=status.HTTP_201_CREATED)
+    
+class UpdateEventView(generics.UpdateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
 
-# CREATE and LIST Ticket Tiers for Events
-class TicketTierListCreateView(generics.ListCreateAPIView):
-    queryset = TicketTier.objects.all()
-    serializer_class = TicketTierSerializer
-    permission_classes = [IsAuthenticated]
-
-# RETRIEVE, UPDATE, and DELETE Ticket Tier
-class TicketTierRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = TicketTier.objects.all()
-    serializer_class = TicketTierSerializer
-    permission_classes = [IsAuthenticated]
+    def perform_update(self, serializer):
+        user = self.request.user
+        if not user.isHost:
+            raise PermissionDenied({"message": "You do not have permission to update this event."})
+        event = serializer.save(user=user)
+        return Response({"message": "Event updated successfully"}, status=status.HTTP_200_OK)

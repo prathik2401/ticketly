@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { loginUser, registerUser } from "../services/api";
+import { loginUser, registerUser } from "../services/accounts/api";
 
 const LoginModal = ({ closeAuthModal, onLogin }) => {
-  const [isLogin, setIsLogin] = useState(true); // Default to login
+  const [isLogin, setIsLogin] = useState(true);
+  const [first_name, setFirstName] = useState("");
+  const [last_name, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -13,11 +16,10 @@ const LoginModal = ({ closeAuthModal, onLogin }) => {
 
   const handleLogin = async () => {
     try {
-      const response = await loginUser(email, password);
-      localStorage.setItem("token", response.access);
-      localStorage.setItem("refreshToken", response.refresh);
-      onLogin();
-      closeAuthModal();
+      const data = await loginUser(email, password);
+      localStorage.setItem("access", data.access);
+      localStorage.setItem("refresh", data.refresh);
+      onLogin(); // Trigger login success action
     } catch (error) {
       setError("Login failed. Please check your credentials.");
     }
@@ -25,7 +27,7 @@ const LoginModal = ({ closeAuthModal, onLogin }) => {
 
   const handleSignup = async () => {
     try {
-      await registerUser(email, password);
+      await registerUser(first_name, last_name, username, email, password);
       toggleForm();
     } catch (error) {
       setError("Signup failed. Please try again.");
@@ -82,6 +84,27 @@ const LoginModal = ({ closeAuthModal, onLogin }) => {
             <h2 className="text-xl font-bold mb-4 text-light-text dark:text-dark-text">
               Sign Up for Ticketly
             </h2>
+            <input
+              type="first_name"
+              placeholder="First Name"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              value={first_name}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <input
+              type="last_name"
+              placeholder="Last Name"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              value={last_name}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <input
+              type="username"
+              placeholder="Username"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
             <input
               type="email"
               placeholder="Email"
