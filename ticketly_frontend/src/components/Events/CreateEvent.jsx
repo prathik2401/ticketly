@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createEvent } from "../services/events/api";
+import { createEvent } from "../../services/events/api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -115,7 +115,7 @@ const CreateEvent = () => {
             name="description"
             value={eventData.description}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-light-primary dark:border-dark-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 text-light-text border border-light-primary dark:border-dark-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
@@ -132,7 +132,7 @@ const CreateEvent = () => {
             name="date_time"
             value={eventData.date_time}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-light-primary dark:border-dark-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border text-light-text border-light-primary dark:border-dark-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
             min={getMinDateTime()}
           />
@@ -150,7 +150,7 @@ const CreateEvent = () => {
             name="location"
             value={eventData.location}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-light-primary dark:border-dark-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border text-light-text border-light-primary dark:border-dark-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
@@ -167,7 +167,7 @@ const CreateEvent = () => {
             name="location_link"
             value={eventData.location_link}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-light-primary dark:border-dark-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border text-light-text border-light-primary dark:border-dark-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>

@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import EventList from "./components/EventList";
-import EventDetails from "./components/EventDetails";
+import EventList from "./components/Events/EventList";
+import EventDetails from "./components/Events/EventDetails";
 import Navbar from "./components/Navbar";
 import LoginModal from "./components/LoginModal";
 import api from "./services/api";
 import { getUserProfile } from "./services/accounts/api";
-import OrganizerPage from "./components/OrganizerPage";
 import Dashboard from "./components/OrganizerDashboard/DashBoard";
 import BookingConfirmation from "./components/Booking/BookingConfirm";
 import BookingsList from "./components/Booking/BookingDetails";
 import UserProfile from "./components/UserProfile";
-import CreateEvent from "./components/CreateEvent";
+import CreateEvent from "./components/Events/CreateEvent";
 import "./App.css";
 
 const App = () => {
@@ -104,7 +103,6 @@ const App = () => {
           <Routes>
             <Route path="/" element={<EventList />} />
             <Route path="/events/:eventId" element={<EventDetails />} />
-            <Route path="/event/create/" element={<OrganizerPage />} />
             <Route path="/organizer-dashboard" element={<Dashboard />} />
             <Route
               path="/bookings/:bookingId"

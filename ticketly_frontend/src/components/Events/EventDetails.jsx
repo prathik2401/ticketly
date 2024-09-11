@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchEventDetails, getUserEvents } from "../services/events/api";
-import { refreshToken } from "../services/accounts/api";
-import { bookEvent } from "../services/bookings/api";
+import { fetchEventDetails, getUserEvents } from "../../services/events/api";
+import { refreshToken } from "../../services/accounts/api";
+import { bookEvent } from "../../services/bookings/api";
 import { FaSpinner } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

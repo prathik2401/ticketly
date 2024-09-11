@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchEventDetails, fetchEvents } from "../services/events/api";
+import { fetchEventDetails, fetchEvents } from "../../services/events/api";
 import EventCard from "./EventCard";
-import LoginModal from "./LoginModal";
+import LoginModal from "../LoginModal";
 
 const S3_BUCKET_URL = process.env.REACT_APP_S3_BUCKET_URL;
 
