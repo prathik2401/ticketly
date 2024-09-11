@@ -19,7 +19,8 @@ const Navbar = ({
   const handleLogoutClick = async () => {
     try {
       await logoutUser();
-      localStorage.removeItem("token");
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
       handleLogout();
     } catch (error) {
       console.error("Logout failed", error);
@@ -44,14 +45,12 @@ const Navbar = ({
         >
           <FontAwesomeIcon icon={isDarkMode ? faSun : faMoon} />
         </button>
-
         <button
           onClick={handleHostEventClick}
           className="p-2 bg-light-buttonBackground dark:bg-dark-buttonBackground text-light-buttonText dark:text-dark-buttonText rounded-lg"
         >
           Host an Event
         </button>
-
         {isLoggedIn ? (
           <div className="relative">
             <button

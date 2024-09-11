@@ -18,7 +18,21 @@ export const registerUser = async (
     return response.data;
   } catch (error) {
     console.error("Error registering user:", error);
-    throw error;
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    try {
+      const response = await api.post(`accounts/register/`, {
+        first_name,
+        last_name,
+        username,
+        email,
+        password,
+      });
+      return response.data;
+    } catch (retryError) {
+      console.error("Retrying registration failed:", retryError);
+      throw retryError;
+    }
   }
 };
 
@@ -28,6 +42,7 @@ export const loginUser = async (email, password) => {
       email,
       password,
     });
+    window.location.reload();
     return response.data;
   } catch (error) {
     console.error("Error logging in user:", error);
@@ -57,7 +72,6 @@ export const logoutUser = async () => {
     if (!refreshToken) {
       throw new Error("No refresh token found");
     }
-
     await api.post(`accounts/logout/`, { refresh: refreshToken });
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
@@ -81,8 +95,11 @@ export const refreshToken = async () => {
 };
 
 export const verifyHost = async () => {
+  console.log("Verifying host...");
+
   try {
     const user = getUserProfile();
+    console.log("User:", user);
     return user.isHost ? true : false;
   } catch (error) {
     console.error("Error verifying host:", error);

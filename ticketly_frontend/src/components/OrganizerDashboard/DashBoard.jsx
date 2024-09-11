@@ -1,19 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./SideBar";
 import UserEvents from "./UserEvents";
+import EventActions from "./EventActions";
 
-const Dashboard = ({ children }) => {
+const Dashboard = () => {
   const navigate = useNavigate();
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const handleGoBack = () => {
     navigate("/");
   };
 
+  const handleEventSelect = (event) => {
+    setSelectedEvent(event);
+  };
+
   return (
     <div className="flex">
+      {/* Sidebar - stays fixed on the left side */}
       <Sidebar />
-      <div className="flex-1 ml-64 bg-light-background dark:dark:bg-dark-background">
+      <div className="flex-1 ml-64 bg-light-background dark:bg-dark-background">
         <div className="p-4">
           <button
             onClick={handleGoBack}
@@ -21,9 +28,13 @@ const Dashboard = ({ children }) => {
           >
             Go Back
           </button>
-          {children}
+          {/* Render either EventActions or UserEvents */}
+          {selectedEvent ? (
+            <EventActions event={selectedEvent} />
+          ) : (
+            <UserEvents onEventSelect={handleEventSelect} />
+          )}
         </div>
-        <UserEvents />
       </div>
     </div>
   );

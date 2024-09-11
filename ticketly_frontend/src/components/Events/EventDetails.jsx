@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchEventDetails, getUserEvents } from "../../services/events/api";
-import { refreshToken } from "../../services/accounts/api";
+import { fetchEventDetails } from "../../services/events/api";
+import {
+  verifyHost,
+  refreshToken,
+  getUserProfile,
+} from "../../services/accounts/api";
 import { bookEvent } from "../../services/bookings/api";
 import { FaSpinner } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
@@ -20,6 +24,22 @@ const EventDetails = () => {
   const [formattedDate, setFormattedDate] = useState("");
   const [formattedTime, setFormattedTime] = useState("");
   const [isUserEvent, setIsUserEvent] = useState(false);
+  const [isHost, setIsHost] = useState(false);
+
+  const setEventDetails = useCallback((eventData) => {
+    setEvent(eventData);
+    setFormattedDate(
+      new Date(eventData.date_time).toLocaleDateString("en-US", {
+        dateStyle: "full",
+      })
+    );
+    setFormattedTime(
+      new Date(eventData.date_time).toLocaleTimeString("en-US", {
+        timeStyle: "short",
+      })
+    );
+    setIsUserEvent(eventData.is_user_event);
+  }, []);
 
   useEffect(() => {
     if (!eventId) return;
@@ -33,47 +53,22 @@ const EventDetails = () => {
         }
 
         const eventData = await fetchEventDetails(eventId);
-        setEvent(eventData);
-        setFormattedDate(
-          new Date(eventData.date_time).toLocaleDateString("en-US", {
-            dateStyle: "full",
-          })
-        );
-        setFormattedTime(
-          new Date(eventData.date_time).toLocaleTimeString("en-US", {
-            timeStyle: "short",
-          })
-        );
-
-        // Fetch user events and check if the current event is created by the user
-        const userEvents = await getUserEvents();
-        const isUserEvent = userEvents.some(
-          (userEvent) => userEvent.id === eventId
-        );
-        setIsUserEvent(isUserEvent);
+        setEventDetails(eventData);
+        const userProfile = await getUserProfile();
+        const hostStatus =
+          userProfile.isHost && userProfile.id === eventData.host_id;
+        console.log("Host Status:", hostStatus);
+        setIsHost(hostStatus);
+        console.log("Is User Event:", eventData.is_user_event);
       } catch (err) {
         if (err.response?.status === 401) {
           try {
             await refreshToken();
             const eventData = await fetchEventDetails(eventId);
-            setEvent(eventData);
-            setFormattedDate(
-              new Date(eventData.date_time).toLocaleDateString("en-US", {
-                dateStyle: "full",
-              })
-            );
-            setFormattedTime(
-              new Date(eventData.date_time).toLocaleTimeString("en-US", {
-                timeStyle: "short",
-              })
-            );
+            setEventDetails(eventData);
 
-            // Fetch user events and check if the current event is created by the user
-            const userEvents = await getUserEvents();
-            const isUserEvent = userEvents.some(
-              (userEvent) => userEvent.id === eventId
-            );
-            setIsUserEvent(isUserEvent);
+            const hostStatus = await verifyHost();
+            setIsHost(hostStatus);
           } catch (refreshError) {
             console.error("Error refreshing token:", refreshError);
             setError("Failed to load event details. Please log in again.");
@@ -88,7 +83,7 @@ const EventDetails = () => {
     };
 
     getEventDetails();
-  }, [eventId]);
+  }, [eventId, setEventDetails]);
 
   const handleBooking = async () => {
     const ticketCountInt = parseInt(ticketCount, 10);
@@ -196,10 +191,10 @@ const EventDetails = () => {
             <button
               onClick={handleBooking}
               className="w-full bg-light-buttonBackground dark:bg-dark-buttonBackground text-light-buttonText dark:text-dark-buttonText font-bold py-3 px-4 rounded-md hover:bg-light-primary dark:hover:bg-dark-primary focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-200 ease-in-out transform hover:scale-105"
-              disabled={event.available_tickets === 0 || isUserEvent}
+              disabled={event.available_tickets === 0 || isUserEvent || isHost}
             >
               {event.available_tickets > 0
-                ? isUserEvent
+                ? isUserEvent || isHost
                   ? "You cannot book your own event"
                   : "Book Tickets"
                 : "Sold Out"}

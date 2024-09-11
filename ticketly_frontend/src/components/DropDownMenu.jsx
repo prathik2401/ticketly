@@ -10,7 +10,7 @@ const DropdownMenu = ({ isHost, onLogout, onClose }) => {
   };
 
   return (
-    <div className="absolute top-16 right-4 bg-light-background dark:dark:bg-dark-background shadow-lg rounded-lg p-2">
+    <div className="absolute top-16 right-4 bg-light-background dark:bg-dark-background shadow-lg rounded-lg p-2">
       <Link
         to="/profile"
         className="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-secondary hover:text-dark-text dark:hover:bg-dark-secondary rounded-lg"
@@ -19,15 +19,15 @@ const DropdownMenu = ({ isHost, onLogout, onClose }) => {
         <FontAwesomeIcon icon={faUser} className="mr-2" />
         Profile
       </Link>
-      <Link
-        to="/organizer-dashboard"
-        className={`block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-secondary hover:text-dark-text dark:hover:bg-dark-secondary rounded-lg ${
-          !isHost && "pointer-events-none opacity-50"
-        }`}
-        onClick={onClose}
-      >
-        Organizer Dashboard
-      </Link>
+      {isHost && (
+        <Link
+          to="/organizer-dashboard"
+          className="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-secondary hover:text-dark-text dark:hover:bg-dark-secondary rounded-lg"
+          onClick={onClose}
+        >
+          Organizer Dashboard
+        </Link>
+      )}
       <Link
         to="/bookings"
         className="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-secondary hover:text-dark-text dark:hover:bg-dark-secondary rounded-lg"

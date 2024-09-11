@@ -23,7 +23,7 @@ export const fetchEventDetails = async (eventId) => {
   }
 };
 
-export const createEvent = async (formData) => {
+export const createEvent = async (formData, refreshNavbar) => {
   try {
     const response = await api.post("events/create/", formData, {
       headers: {
@@ -31,6 +31,7 @@ export const createEvent = async (formData) => {
         "Content-Type": "multipart/form-data",
       },
     });
+    refreshNavbar(); // Call the refreshNavbar callback after successful event creation
     return response.data;
   } catch (error) {
     if (error.response && error.response.status === 401) {
@@ -42,6 +43,7 @@ export const createEvent = async (formData) => {
             "Content-Type": "multipart/form-data",
           },
         });
+        refreshNavbar(); // Call the refreshNavbar callback after successful event creation
         return response.data;
       } catch (refreshError) {
         throw refreshError.response
@@ -57,10 +59,25 @@ export const createEvent = async (formData) => {
 
 export const updateEvent = async (eventId, eventData) => {
   try {
+    const {
+      name,
+      description,
+      date_time,
+      location,
+      location_link,
+      total_tickets,
+      available_tickets,
+    } = eventData;
     const response = await api.put(
       `events/${eventId}/update/`,
       {
-        event: eventData,
+        name: name,
+        description: description,
+        date_time: date_time,
+        location: location,
+        location_link: location_link,
+        total_tickets: total_tickets,
+        available_tickets: available_tickets,
       },
       {
         headers: {
@@ -104,10 +121,26 @@ export const getUserEvents = async () => {
         Authorization: `Bearer ${localStorage.getItem("access")}`,
       },
     });
+    console.log(response.data);
     return response.data;
   } catch (error) {
     throw error.response
       ? error.response.data
       : new Error("An error occurred while fetching the user's events");
+  }
+};
+
+export const deleteEvent = async (eventId) => {
+  try {
+    const response = await api.delete(`events/${eventId}/delete/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response
+      ? error.response.data
+      : new Error("An error occurred while deleting the event");
   }
 };

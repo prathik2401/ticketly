@@ -166,7 +166,7 @@ const EventList = () => {
                     onClick={() => paginate(index + 1)}
                     className={`px-4 py-2 rounded-full ${
                       currentPage === index + 1
-                        ? "bg-primary text-white"
+                        ? "bg-light-secondary text-white"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     }`}
                   >

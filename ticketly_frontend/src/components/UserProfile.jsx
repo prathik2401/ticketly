@@ -87,7 +87,7 @@ const UserProfile = () => {
             />
           </div>
           <div className="ml-6">
-            <p className="text-xl font-semibold text-dark-text">
+            <p className="text-xl font-semibold text-light-text dark:text-dark-text">
               {profile.first_name} {profile.last_name}
             </p>
             <p className="text-dark-secondary">@{profile.username}</p>

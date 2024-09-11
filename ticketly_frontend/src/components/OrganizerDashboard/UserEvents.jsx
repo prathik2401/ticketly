@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { getUserEvents } from "../../services/events/api";
 import { FaSpinner } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const UserEvents = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const fetchUserEvents = async () => {
@@ -48,7 +48,7 @@ const UserEvents = () => {
             <div
               key={event.id}
               className="bg-light-background dark:bg-dark-background border-2 dark:border-blue-900 p-6 rounded-lg shadow-lg hover:shadow-xl dark:hover:shadow-gray-900 transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer"
-              onClick={() => navigate(`/events/${event.id}`)}
+              onClick={() => navigate(`/events/actions/${event.id}`)} // Navigate to EventActions
             >
               <h2 className="text-2xl font-bold text-light-primary dark:text-dark-secondary mb-4">
                 {event.name}

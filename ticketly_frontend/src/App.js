@@ -11,6 +11,7 @@ import BookingConfirmation from "./components/Booking/BookingConfirm";
 import BookingsList from "./components/Booking/BookingDetails";
 import UserProfile from "./components/UserProfile";
 import CreateEvent from "./components/Events/CreateEvent";
+import EventActions from "./components/OrganizerDashboard/EventActions";
 import "./App.css";
 
 const App = () => {
@@ -70,10 +71,12 @@ const App = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
     setIsLoggedIn(false);
     setShowLoginModal(true);
+  };
+
+  const refreshNavbar = () => {
+    fetchUserProfile();
   };
 
   return (
@@ -109,8 +112,12 @@ const App = () => {
               element={<BookingConfirmation />}
             />
             <Route path="/bookings" element={<BookingsList />} />
-            <Route path="/profile" element={<UserProfile />} />{" "}
-            <Route path="/create-event" element={<CreateEvent />} />
+            <Route path="/profile" element={<UserProfile />} />
+            <Route
+              path="/create-event"
+              element={<CreateEvent refreshNavbar={refreshNavbar} />}
+            />
+            <Route path="/events/actions/:eventId" element={<EventActions />} />
           </Routes>
         </div>
       </Router>

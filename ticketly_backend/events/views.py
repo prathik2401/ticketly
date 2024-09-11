@@ -8,6 +8,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from accounts.models import User
 from bookings.models import Booking
+from events.models import Event
+
 class EventPagination(PageNumberPagination):
     page_size = 30 
 
@@ -89,17 +91,26 @@ class DeleteEventView(generics.DestroyAPIView):
             raise PermissionDenied({"message": "You do not have permission to delete this event."})
         if event.user != user:
             raise PermissionDenied({"message": "You are not authorized to delete this event."})
+        
+        # Cancel related bookings
         Booking.objects.filter(event=event).update(status='Cancelled')
+        
+        # Delete the event
         event.delete()
+        
+        # Check if the user is hosting any other events
+        if not Event.objects.filter(user=user).exists():
+            user.isHost = False
+            user.save()
+        
         return Response({"message": "Event deleted successfully, and related bookings have been cancelled."}, status=status.HTTP_204_NO_CONTENT)
 
 class UserHostEventsView(generics.ListAPIView):
     serializer_class = EventListSerializer
     permission_classes = [IsAuthenticated]
-
+    
     def get_queryset(self):
         user = self.request.user
         if not user.isHost:
             raise PermissionDenied({"message": "You are not authorized to view events created by hosts."})
-        return Event.objects.filter(user__isHost=True)
-
+        return Event.objects.filter(user__isHost=True, user_id=user.id)
