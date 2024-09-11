@@ -93,30 +93,30 @@ WSGI_APPLICATION = 'ticketly_backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-# DATABASES = {
-#   'default': {
-#     'ENGINE': 'django.db.backends.postgresql',
-#     'NAME': getenv('PGDATABASE'),
-#     'USER': getenv('PGUSER'),
-#     'PASSWORD': getenv('PGPASSWORD'),
-#     'HOST': getenv('PGHOST'),
-#     'PORT': getenv('PGPORT', 5432),
-#     'OPTIONS': {
-#       'sslmode': 'require',
-#     },
-#   }
-# }
-
 DATABASES = {
   'default': {
-    'ENGINE': 'django.db.backends.mysql',
-    'NAME': 'ticketly',
-    'USER': 'root',
-    'PASSWORD': 'root',
-    'HOST': 'localhost',
-    'PORT': '3306',
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': getenv('PGDATABASE'),
+    'USER': getenv('PGUSER'),
+    'PASSWORD': getenv('PGPASSWORD'),
+    'HOST': getenv('PGHOST'),
+    'PORT': getenv('PGPORT', 5432),
+    'OPTIONS': {
+      'sslmode': 'require',
+    },
   }
 }
+
+# DATABASES = {
+#   'default': {
+#     'ENGINE': 'django.db.backends.mysql',
+#     'NAME': 'ticketly',
+#     'USER': 'root',
+#     'PASSWORD': 'root',
+#     'HOST': 'localhost',
+#     'PORT': '3306',
+#   }
+# }
 
 AWS_ACCESS_KEY_ID = getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = getenv('AWS_SECRET_ACCESS_KEY')
