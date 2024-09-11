@@ -1,5 +1,5 @@
 import axios from "axios";
-import { refreshToken } from "./accounts/api"; // Adjust based on your file structure
+import { refreshToken } from "./accounts/api";
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -41,7 +41,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
       if (error.response.data.code === "token_not_valid") {
         if (!isRefreshing) {
           isRefreshing = true;
@@ -62,8 +66,6 @@ api.interceptors.response.use(
             isRefreshing = false;
           }
         }
-
-        // Queue the failed request and retry once the token is refreshed
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })

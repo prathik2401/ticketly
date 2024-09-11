@@ -40,3 +40,28 @@ class VerifyTokenView(APIView):
             return Response({"message": "Token is valid"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"message": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+class GetUserInformation(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+class UpdateUserView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    def put(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, instance=self.get_object(), partial=True)
+        if serializer.is_valid():
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

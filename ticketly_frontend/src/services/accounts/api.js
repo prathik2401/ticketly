@@ -8,7 +8,7 @@ export const registerUser = async (
   password
 ) => {
   try {
-    const response = await api.post(`/accounts/register/`, {
+    const response = await api.post(`accounts/register/`, {
       first_name,
       last_name,
       username,
@@ -24,13 +24,28 @@ export const registerUser = async (
 
 export const loginUser = async (email, password) => {
   try {
-    const response = await api.post("/accounts/login/", {
+    const response = await api.post("accounts/login/", {
       email,
       password,
     });
     return response.data;
   } catch (error) {
     console.error("Error logging in user:", error);
+    throw error;
+  }
+};
+
+export const getUserProfile = async () => {
+  try {
+    const refreshToken = localStorage.getItem("refresh");
+    const accessToken = localStorage.getItem("access");
+    const response = await api.get("accounts/user/", {
+      refresh: refreshToken,
+      access: accessToken,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
     throw error;
   }
 };
@@ -43,7 +58,7 @@ export const logoutUser = async () => {
       throw new Error("No refresh token found");
     }
 
-    await api.post(`/accounts/logout/`, { refresh: refreshToken });
+    await api.post(`accounts/logout/`, { refresh: refreshToken });
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
   } catch (error) {
@@ -54,14 +69,48 @@ export const logoutUser = async () => {
 
 export const refreshToken = async () => {
   try {
-    const refresh = (localStorage.getItem = "refresh");
-    const response = await api.post(`api/accounts/token/refresh/`, {
+    const refresh = localStorage.getItem("refresh");
+    const response = await api.post(`accounts/token/refresh/`, {
       refresh,
     });
     localStorage.setItem("access", response.data.access);
     return response.data.access;
   } catch (error) {
-    console.log("Error refreshing token:", error);
+    throw error;
+  }
+};
+
+export const verifyHost = async () => {
+  try {
+    const user = getUserProfile();
+    return user.isHost ? true : false;
+  } catch (error) {
+    console.error("Error verifying host:", error);
+    throw error;
+  }
+};
+
+export const updateUserProfile = async (profile) => {
+  console.log(profile);
+  try {
+    const { username, email, first_name, last_name } = profile;
+    const response = await api.put(
+      "accounts/user/update/",
+      {
+        email: email,
+        first_name: first_name,
+        last_name: last_name,
+        username: username,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access")}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
     throw error;
   }
 };

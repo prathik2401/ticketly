@@ -27,7 +27,7 @@ class EventCreationTestCase(APITestCase):
         
         # Check if the user is marked as host
         user_profile = UserProfile.objects.get(user=self.user)
-        self.assertTrue(user_profile.is_host)
+        self.assertTrue(user_profile.isHost)
 
         # Check if the event is associated with the user
         event = Event.objects.get(name='Test Event')

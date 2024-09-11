@@ -5,7 +5,9 @@ from .models import Event
 from .serializers import EventListSerializer, EventDetailSerializer, EventSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied
-
+from rest_framework.views import APIView
+from accounts.models import User
+from bookings.models import Booking
 class EventPagination(PageNumberPagination):
     page_size = 30 
 
@@ -47,3 +49,57 @@ class UpdateEventView(generics.UpdateAPIView):
             raise PermissionDenied({"message": "You do not have permission to update this event."})
         event = serializer.save(user=user)
         return Response({"message": "Event updated successfully"}, status=status.HTTP_200_OK)
+
+class EventStaffView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            event = Event.objects.get(id=pk)
+            if event.user != request.user:
+                return Response({'detail': 'You are not the host of this event.'}, status=status.HTTP_403_FORBIDDEN)
+        except Event.DoesNotExist:
+            return Response({'detail': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = EventSerializer(event, data=request.data, partial=True)
+        if serializer.is_valid():
+            event = serializer.save()
+            staff_ids = request.data.get('staff', [])
+            for user_id in staff_ids:
+                try:
+                    user = User.objects.get(id=user_id)
+                    user.is_staff = True
+                    user.save()
+                    event.staff.add(user)
+                except User.DoesNotExist:
+                    return Response({'detail': f'User with ID {user_id} not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteEventView(generics.DestroyAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        event = self.get_object()
+        if not user.isHost:
+            raise PermissionDenied({"message": "You do not have permission to delete this event."})
+        if event.user != user:
+            raise PermissionDenied({"message": "You are not authorized to delete this event."})
+        Booking.objects.filter(event=event).update(status='Cancelled')
+        event.delete()
+        return Response({"message": "Event deleted successfully, and related bookings have been cancelled."}, status=status.HTTP_204_NO_CONTENT)
+
+class UserHostEventsView(generics.ListAPIView):
+    serializer_class = EventListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.isHost:
+            raise PermissionDenied({"message": "You are not authorized to view events created by hosts."})
+        return Event.objects.filter(user__isHost=True)
+

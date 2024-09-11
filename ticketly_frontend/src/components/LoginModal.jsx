@@ -36,7 +36,7 @@ const LoginModal = ({ closeAuthModal, onLogin }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-light-background dark:bg-dark-background p-6 rounded-lg shadow-lg max-w-sm w-full relative">
+      <div className="bg-light-background dark:dark:bg-dark-background p-6 rounded-lg shadow-lg max-w-sm w-full relative">
         <button
           className="absolute top-2 right-2 text-light-text dark:text-dark-text"
           onClick={closeAuthModal}
@@ -52,14 +52,14 @@ const LoginModal = ({ closeAuthModal, onLogin }) => {
             <input
               type="email"
               placeholder="Email"
-              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:dark:bg-dark-background text-light-text dark:text-dark-text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
             <input
               type="password"
               placeholder="Password"
-              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:dark:bg-dark-background text-light-text dark:text-dark-text"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -87,35 +87,35 @@ const LoginModal = ({ closeAuthModal, onLogin }) => {
             <input
               type="first_name"
               placeholder="First Name"
-              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:dark:bg-dark-background text-light-text dark:text-dark-text"
               value={first_name}
               onChange={(e) => setFirstName(e.target.value)}
             />
             <input
               type="last_name"
               placeholder="Last Name"
-              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:dark:bg-dark-background text-light-text dark:text-dark-text"
               value={last_name}
               onChange={(e) => setLastName(e.target.value)}
             />
             <input
               type="username"
               placeholder="Username"
-              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:dark:bg-dark-background text-light-text dark:text-dark-text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
             <input
               type="email"
               placeholder="Email"
-              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:dark:bg-dark-background text-light-text dark:text-dark-text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
             <input
               type="password"
               placeholder="Password"
-              className="w-full mb-3 p-2 border rounded bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+              className="w-full mb-3 p-2 border rounded bg-light-background dark:dark:bg-dark-background text-light-text dark:text-dark-text"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />

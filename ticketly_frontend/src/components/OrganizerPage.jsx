@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createEvent } from "../services/api"; // Import function to handle API requests
+import { createEvent } from "../services/events/api";
 
 const OrganizerPage = () => {
   const [eventName, setEventName] = useState("");
@@ -57,7 +57,7 @@ const OrganizerPage = () => {
   const minDateString = minDate.toISOString().slice(0, 16);
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <div className="max-w-2xl mx-auto p-4 bg-light-background dark:dark:bg-dark-background text-light-text dark:text-dark-text">
       <h1 className="text-2xl font-bold mb-4">Create an Event</h1>
       <form onSubmit={handleEventSubmit} className="space-y-4">
         <div>
@@ -67,7 +67,7 @@ const OrganizerPage = () => {
             value={eventName}
             onChange={handleEventNameChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text dark:border-gray-600"
           />
         </div>
         <div>
@@ -76,7 +76,7 @@ const OrganizerPage = () => {
             value={eventDescription}
             onChange={handleEventDescriptionChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text dark:border-gray-600"
           />
         </div>
         <div>
@@ -89,7 +89,7 @@ const OrganizerPage = () => {
             onChange={handleEventDateTimeChange}
             required
             min={minDateString} // Set minimum date and time
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text dark:border-gray-600"
           />
         </div>
         <div>
@@ -101,7 +101,7 @@ const OrganizerPage = () => {
             value={totalTickets}
             onChange={handleTotalTicketsChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text dark:border-gray-600"
           />
         </div>
         <div>
@@ -113,7 +113,7 @@ const OrganizerPage = () => {
             value={availableTickets}
             onChange={handleAvailableTicketsChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text dark:border-gray-600"
           />
         </div>
         <div>
@@ -125,7 +125,7 @@ const OrganizerPage = () => {
             value={ticketPrice}
             onChange={handleTicketPriceChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text dark:border-gray-600"
           />
         </div>
         <div>
@@ -134,7 +134,7 @@ const OrganizerPage = () => {
             type="text"
             value={location}
             onChange={handleLocationChange}
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text dark:border-gray-600"
           />
         </div>
         <div>
@@ -145,7 +145,7 @@ const OrganizerPage = () => {
             type="url"
             value={locationLink}
             onChange={handleLocationLinkChange}
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text dark:border-gray-600"
           />
         </div>
         <div>
@@ -153,12 +153,12 @@ const OrganizerPage = () => {
           <input
             type="file"
             onChange={handleEventImageChange}
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text dark:border-gray-600"
           />
         </div>
         <button
           type="submit"
-          className="w-full bg-green-500 text-white p-2 rounded-md hover:bg-green-600"
+          className="w-full bg-light-primary text-light-buttonText dark:bg-dark-primary dark:text-dark-buttonText p-2 rounded-md hover:bg-light-primary-dark dark:hover:bg-dark-primary-dark"
         >
           Submit Event Details
         </button>

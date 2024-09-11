@@ -3,7 +3,7 @@ import api from "../api";
 export const bookEvent = async (eventId, numberOfTickets) => {
   try {
     const response = await api.post(
-      `/bookings/events/${eventId}/book/`,
+      `bookings/events/${eventId}/book/`,
       {
         number_of_tickets: numberOfTickets,
       },
@@ -18,5 +18,35 @@ export const bookEvent = async (eventId, numberOfTickets) => {
     throw error.response
       ? error.response.data
       : new Error("An error occurred while booking the event");
+  }
+};
+
+export const fetchBookingDetails = async (bookingId) => {
+  try {
+    const response = await api.get(`bookings/${bookingId}/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response
+      ? error.response.data
+      : new Error("An error occurred while fetching booking details");
+  }
+};
+
+export const fetchAllBookings = async () => {
+  try {
+    const response = await api.get("bookings/user/", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response
+      ? error.response.data
+      : new Error("An error occurred while fetching bookings");
   }
 };

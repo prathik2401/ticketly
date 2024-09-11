@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { fetchEventDetails } from "../services/events/api";
+import { useParams, useNavigate } from "react-router-dom";
+import { fetchEventDetails, getUserEvents } from "../services/events/api";
 import { refreshToken } from "../services/accounts/api";
 import { bookEvent } from "../services/bookings/api";
 import { FaSpinner } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const S3_BUCKET_URL = process.env.REACT_APP_S3_BUCKET_URL;
 
 const EventDetails = () => {
   const { eventId } = useParams();
+  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [ticketCount, setTicketCount] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [bookingError, setBookingError] = useState(null);
+  const [formattedDate, setFormattedDate] = useState("");
+  const [formattedTime, setFormattedTime] = useState("");
+  const [isUserEvent, setIsUserEvent] = useState(false);
 
   useEffect(() => {
     if (!eventId) return;
@@ -28,12 +34,46 @@ const EventDetails = () => {
 
         const eventData = await fetchEventDetails(eventId);
         setEvent(eventData);
+        setFormattedDate(
+          new Date(eventData.date_time).toLocaleDateString("en-US", {
+            dateStyle: "full",
+          })
+        );
+        setFormattedTime(
+          new Date(eventData.date_time).toLocaleTimeString("en-US", {
+            timeStyle: "short",
+          })
+        );
+
+        // Fetch user events and check if the current event is created by the user
+        const userEvents = await getUserEvents();
+        const isUserEvent = userEvents.some(
+          (userEvent) => userEvent.id === eventId
+        );
+        setIsUserEvent(isUserEvent);
       } catch (err) {
         if (err.response?.status === 401) {
           try {
             await refreshToken();
             const eventData = await fetchEventDetails(eventId);
             setEvent(eventData);
+            setFormattedDate(
+              new Date(eventData.date_time).toLocaleDateString("en-US", {
+                dateStyle: "full",
+              })
+            );
+            setFormattedTime(
+              new Date(eventData.date_time).toLocaleTimeString("en-US", {
+                timeStyle: "short",
+              })
+            );
+
+            // Fetch user events and check if the current event is created by the user
+            const userEvents = await getUserEvents();
+            const isUserEvent = userEvents.some(
+              (userEvent) => userEvent.id === eventId
+            );
+            setIsUserEvent(isUserEvent);
           } catch (refreshError) {
             console.error("Error refreshing token:", refreshError);
             setError("Failed to load event details. Please log in again.");
@@ -51,18 +91,26 @@ const EventDetails = () => {
   }, [eventId]);
 
   const handleBooking = async () => {
-    if (ticketCount <= 0 || ticketCount > event.availableTickets) {
+    const ticketCountInt = parseInt(ticketCount, 10);
+    if (ticketCountInt <= 0 || ticketCountInt > event.available_tickets) {
       setBookingError("Please enter a valid number of tickets.");
       return;
     }
 
     try {
-      const bookingData = { number_of_tickets: ticketCount };
-      await bookEvent(eventId, bookingData);
-      alert("Tickets booked successfully!");
-      setBookingError(null); // Clear any previous booking errors
+      const bookingData = await bookEvent(eventId, ticketCountInt);
+      toast.success("Tickets booked successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      setBookingError(null);
+      navigate(`/bookings/${bookingData.booking_id}/`);
     } catch (error) {
       console.error("Error booking tickets:", error);
+      toast.error("Failed to book tickets. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       setBookingError("Failed to book tickets. Please try again.");
     }
   };
@@ -72,8 +120,7 @@ const EventDetails = () => {
       const url = new URL(imageUrl);
       return `${S3_BUCKET_URL}${url.pathname}`;
     } catch (error) {
-      console.error("Invalid URL:", imageUrl);
-      return null; // Return null if URL is invalid
+      return null;
     }
   };
 
@@ -89,7 +136,7 @@ const EventDetails = () => {
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       <div className="relative w-full h-96">
-        {event.image ? (
+        {event.image !== "null" ? (
           <img
             src={getS3ImageUrl(event.image)}
             alt={event.name}
@@ -117,14 +164,13 @@ const EventDetails = () => {
             </div>
             <div className="text-lg text-light-text dark:text-dark-text mb-6">
               <span className="font-semibold">Date and Time:</span>{" "}
-              {new Date(event.date_and_time).toLocaleString("en-US", {
-                dateStyle: "full",
-                timeStyle: "short",
-              })}
+              {formattedDate} at {formattedTime}
             </div>
             <div className="text-lg text-light-text dark:text-dark-text mb-6">
               <span className="font-semibold">Available Tickets:</span>{" "}
-              {event.availableTickets > 0 ? event.availableTickets : "Sold Out"}
+              {event.available_tickets > 0
+                ? event.available_tickets
+                : "Sold Out"}
             </div>
           </div>
           <div className="flex-1 bg-light-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-inner">
@@ -138,9 +184,9 @@ const EventDetails = () => {
               <input
                 type="number"
                 min="1"
-                max={event.availableTickets}
+                max={event.available_tickets}
                 value={ticketCount}
-                onChange={(e) => setTicketCount(e.target.value)}
+                onChange={(e) => setTicketCount(parseInt(e.target.value, 10))}
                 className="w-full px-4 py-3 border border-light-primary dark:border-dark-primary text-dark-primary dark:text-dark-buttonText bg-light-background dark:bg-dark-background rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
               />
               {bookingError && (
@@ -150,13 +196,18 @@ const EventDetails = () => {
             <button
               onClick={handleBooking}
               className="w-full bg-light-buttonBackground dark:bg-dark-buttonBackground text-light-buttonText dark:text-dark-buttonText font-bold py-3 px-4 rounded-md hover:bg-light-primary dark:hover:bg-dark-primary focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-200 ease-in-out transform hover:scale-105"
-              disabled={event.availableTickets === 0}
+              disabled={event.available_tickets === 0 || isUserEvent}
             >
-              {event.availableTickets > 0 ? "Book Tickets" : "Sold Out"}
+              {event.available_tickets > 0
+                ? isUserEvent
+                  ? "You cannot book your own event"
+                  : "Book Tickets"
+                : "Sold Out"}
             </button>
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

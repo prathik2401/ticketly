@@ -9,8 +9,11 @@ const S3_BUCKET_URL = process.env.REACT_APP_S3_BUCKET_URL;
 const EventList = () => {
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState("A-Z");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [redirectAfterLogin, setRedirectAfterLogin] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const eventsPerPage = 30;
   const hasFetchedEvents = useRef(false);
   const navigate = useNavigate();
 
@@ -34,7 +37,6 @@ const EventList = () => {
       const url = new URL(imageUrl);
       return `${S3_BUCKET_URL}${url.pathname}`;
     } catch (error) {
-      console.error("Invalid URL:", imageUrl);
       return imageUrl;
     }
   };
@@ -63,18 +65,34 @@ const EventList = () => {
     );
   });
 
+  const sortedEvents = filteredEvents.sort((a, b) => {
+    switch (sortOption) {
+      case "A-Z":
+        return a.name.localeCompare(b.name);
+      case "Z-A":
+        return b.name.localeCompare(a.name);
+      case "Recently Posted":
+        return new Date(b.date_time) - new Date(a.date_time);
+      default:
+        return 0;
+    }
+  });
+
   const checkAuthentication = () => {
     return localStorage.getItem("access");
   };
 
-  const handleEventClick = (eventId) => {
+  const handleEventClick = (event) => {
     if (checkAuthentication()) {
-      const eventDetails = fetchEventDetails(eventId);
-      navigate(`/events/${eventId}`);
+      const formattedDate = formatDate(event.date_time);
+      const formattedTime = formatTime(event.date_time);
+      const eventDetails = fetchEventDetails(event.id);
+      navigate(`/events/${event.id}`, {
+        state: { formattedDate, formattedTime },
+      });
       return eventDetails;
     } else {
-      // User is not authenticated, open the login modal
-      setRedirectAfterLogin(`/events/${eventId}`);
+      setRedirectAfterLogin(`/events/${event.id}`);
       setIsModalOpen(true);
     }
   };
@@ -86,44 +104,80 @@ const EventList = () => {
     }
   };
 
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEvents = sortedEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
-    <div className="container mx-auto dark:bg-dark-background bg-light-background text-light-text dark:text-dark-text">
-      <div className="flex justify-left mb-8">
-        <h1 className="text-3xl dark:text-dark-text text-light-text mt-8">
-          Browse Events
+    <div className="container mx-auto px-6 py-12 dark:dark:bg-dark-background bg-light-background text-light-text dark:text-dark-text">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold dark:text-dark-text text-light-text mt-8 mb-6">
+          Discover Events
         </h1>
+        <div className="flex w-full justify-between items-center space-x-4 mb-4">
+          <input
+            type="text"
+            placeholder="Search events by name, location, or date..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border border-gray-300 rounded-full p-3 pl-5 w-full md:w-2/3 bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text focus:ring-2 focus:ring-primary"
+          />
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="border border-gray-300 rounded-full p-3 pl-5 bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text focus:ring-2 focus:ring-primary"
+          >
+            <option value="A-Z">A-Z</option>
+            <option value="Z-A">Z-A</option>
+            <option value="Recently Posted">Recently Posted</option>
+          </select>
+        </div>
       </div>
-      <div className="flex justify-center mb-8">
-        <input
-          type="text"
-          placeholder="Search events by name, location, or date..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="border border-gray-300 rounded-full p-2 pl-5 w-full bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text"
-        />
-      </div>
-      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {filteredEvents.length > 0 ? (
-          filteredEvents.map((event) => (
-            <li key={event.id} className="w-full">
-              <div
-                className="cursor-pointer hover:bg-light-secondary dark:hover:bg-dark-secondary transition-colors p-4 rounded-lg"
-                onClick={() => handleEventClick(event.id)}
-              >
-                <EventCard
-                  name={event.name}
-                  location={event.location}
-                  image={getS3ImageUrl(event.image)}
-                  date={`Date: ${formatDate(event.date_time)}`}
-                  time={`Time: ${formatTime(event.date_time)}`}
-                />
-              </div>
-            </li>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {currentEvents.length > 0 ? (
+          currentEvents.map((event) => (
+            <EventCard
+              key={event.id}
+              name={event.name}
+              location={event.location}
+              image={getS3ImageUrl(event.image)}
+              date={event.date_time}
+              onClick={() => handleEventClick(event)}
+            />
           ))
         ) : (
-          <div className="text-center text-gray-500">No events found.</div>
+          <div className="text-center text-gray-500 w-full col-span-full">
+            No events found.
+          </div>
         )}
-      </ul>
+      </div>
+
+      <div className="flex justify-center mt-8">
+        <nav>
+          <ul className="flex list-none">
+            {Array.from(
+              { length: Math.ceil(sortedEvents.length / eventsPerPage) },
+              (_, index) => (
+                <li key={index} className="mx-1">
+                  <button
+                    onClick={() => paginate(index + 1)}
+                    className={`px-4 py-2 rounded-full ${
+                      currentPage === index + 1
+                        ? "bg-primary text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                </li>
+              )
+            )}
+          </ul>
+        </nav>
+      </div>
 
       {isModalOpen && (
         <LoginModal
