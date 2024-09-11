@@ -1,0 +1,1 @@
+web: gunicorn ticketly_backend.wsgi --log-file
