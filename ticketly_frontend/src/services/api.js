@@ -17,7 +17,7 @@ const processQueue = (error, token = null) => {
 
 const api = axios.create({
   baseURL:
-    "https://8e1f0b48-e0fb-47a5-9862-833d90622395-prod.e1-eu-north-azure.choreoapis.dev/ticketly/backend/v1.0/api/",
+    "http://8e1f0b48-e0fb-47a5-9862-833d90622395-prod.e1-eu-north-azure.choreoapis.dev/ticketly/backend/v1.0/api/",
   timeout: 5000,
   headers: {
     "Content-Type": "application/json",
