@@ -19,6 +19,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['https://8e1f0b48-e0fb-47a5-9862-833d90622395-prod.e1-eu-north-azure.choreoapis.dev/ticketly/backend/v1.0/','www.ticketly.live' ,'ticketly.live', 'localhost']
 
+SECURE_SSL_REDIRECT = True
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply to subdomains
+SECURE_HSTS_PRELOAD = True  # Preload HSTS in browsers
 
 # Application definition
 
