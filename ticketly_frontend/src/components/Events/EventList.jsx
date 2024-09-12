@@ -89,11 +89,11 @@ const EventList = () => {
     if (checkAuthentication()) {
       const formattedDate = formatDate(event.date_time);
       const formattedTime = formatTime(event.date_time);
-      const eventDetails = fetchEventDetails(event.id);
-      navigate(`/events/${event.id}`, {
-        state: { formattedDate, formattedTime },
+      fetchEventDetails(event.id).then(() => {
+        navigate(`/events/${event.id}`, {
+          state: { formattedDate, formattedTime },
+        });
       });
-      return eventDetails;
     } else {
       setRedirectAfterLogin(`/events/${event.id}`);
       setIsModalOpen(true);
@@ -114,7 +114,7 @@ const EventList = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="container mx-auto px-6 py-12 dark:dark:bg-dark-background bg-light-background text-light-text dark:text-dark-text">
+    <div className="container mx-auto px-6 py-12 dark:bg-dark-background bg-light-background text-light-text dark:text-dark-text">
       <div className="mb-8">
         <h1 className="text-4xl font-bold dark:text-dark-text text-light-text mt-8 mb-6">
           Discover Events
@@ -125,12 +125,12 @@ const EventList = () => {
             placeholder="Search events by name, location, or date..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border border-gray-300 rounded-full p-3 pl-5 w-full md:w-2/3 bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text focus:ring-2 focus:ring-primary"
+            className="border border-gray-300 rounded-full p-3 pl-5 w-full md:w-2/3 bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text focus:ring-2 focus:ring-primary"
           />
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
-            className="border border-gray-300 rounded-full p-3 pl-5 bg-light-background text-light-text dark:dark:bg-dark-background dark:text-dark-text focus:ring-2 focus:ring-primary"
+            className="border border-gray-300 rounded-full p-3 pl-5 bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text focus:ring-2 focus:ring-primary"
           >
             <option value="A-Z">A-Z</option>
             <option value="Z-A">Z-A</option>
