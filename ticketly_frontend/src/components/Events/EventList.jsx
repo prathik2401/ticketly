@@ -55,15 +55,18 @@ const EventList = () => {
     });
   };
 
-  const filteredEvents = events.filter((event) => {
-    const searchTerm = searchQuery.toLowerCase();
-    const eventDate = new Date(event.date_time).toLocaleDateString("en-US");
-    return (
-      event.name.toLowerCase().includes(searchTerm) ||
-      event.location.toLowerCase().includes(searchTerm) ||
-      eventDate.includes(searchTerm)
-    );
-  });
+  const filteredEvents = Array.isArray(events)
+    ? events.filter((event) => {
+        const searchTerm = searchQuery.toLowerCase();
+        const eventDate = new Date(event.date_time).toLocaleDateString("en-US");
+        return (
+          event.name.toLowerCase().includes(searchTerm) ||
+          event.location.toLowerCase().includes(searchTerm) ||
+          eventDate.includes(searchTerm)
+        );
+      })
+    : [];
+
 
   const sortedEvents = filteredEvents.sort((a, b) => {
     switch (sortOption) {
