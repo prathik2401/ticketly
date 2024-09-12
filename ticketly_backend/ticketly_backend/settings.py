@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-071j*=ng6bsg(xoo8w5pr1oj_5=a%m2hjx2m(^vh9($(5tkapq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["backend-2217440899.dp-development-ticketly-51323-962086627"]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
