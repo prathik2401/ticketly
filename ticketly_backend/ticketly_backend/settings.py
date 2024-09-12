@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-071j*=ng6bsg(xoo8w5pr1oj_5=a%m2hjx2m(^vh9($(5tkapq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['http://8e1f0b48-e0fb-47a5-9862-833d90622395-prod.e1-eu-north-azure.choreoapis.dev/ticketly/backend/v1.0/','https://8e1f0b48-e0fb-47a5-9862-833d90622395-prod.e1-eu-north-azure.choreoapis.dev/ticketly/backend/v1.0/', '&#x27;backend-2217440899.dp-production-ticketly-51323-962086627&#x27','www.ticketly.live' ,'ticketly.live', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 SECURE_SSL_REDIRECT = True
 
