@@ -50,3 +50,18 @@ export const fetchAllBookings = async () => {
       : new Error("An error occurred while fetching bookings");
   }
 };
+
+export const adminFetchAllBookings = async (eventId) => {
+  try {
+    const response = await api.get(`bookings/events/${eventId}/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response
+      ? error.response.data
+      : new Error("An error occurred while fetching bookings");
+  }
+};

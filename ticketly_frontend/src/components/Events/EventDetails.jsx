@@ -57,9 +57,7 @@ const EventDetails = () => {
         const userProfile = await getUserProfile();
         const hostStatus =
           userProfile.isHost && userProfile.id === eventData.host_id;
-        console.log("Host Status:", hostStatus);
         setIsHost(hostStatus);
-        console.log("Is User Event:", eventData.is_user_event);
       } catch (err) {
         if (err.response?.status === 401) {
           try {

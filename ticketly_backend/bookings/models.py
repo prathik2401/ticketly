@@ -26,15 +26,14 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking by {self.user.username} for {self.event.name}"
-
+    # logic to generate QR code for the booking
     def generate_qr_code(self):
         qr_data = f"Booking ID: {self.id}\nEvent: {self.event.name}\nUser: {self.user.username}\nNumber of Tickets: {self.number_of_tickets}"
         qr_img = qrcode.make(qr_data)
-
         with BytesIO() as buffer:
             qr_img.save(buffer, format="PNG")
             buffer.seek(0)
-
+            #  Save the QR code in the S3 bucket
             event_folder = "bookings_qr/"
             file_name = f"{self.id}.png"
             s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)

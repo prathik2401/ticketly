@@ -95,11 +95,8 @@ export const refreshToken = async () => {
 };
 
 export const verifyHost = async () => {
-  console.log("Verifying host...");
-
   try {
     const user = getUserProfile();
-    console.log("User:", user);
     return user.isHost ? true : false;
   } catch (error) {
     console.error("Error verifying host:", error);
@@ -108,7 +105,6 @@ export const verifyHost = async () => {
 };
 
 export const updateUserProfile = async (profile) => {
-  console.log(profile);
   try {
     const { username, email, first_name, last_name } = profile;
     const response = await api.put(

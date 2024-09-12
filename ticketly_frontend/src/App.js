@@ -12,6 +12,7 @@ import BookingsList from "./components/Booking/BookingDetails";
 import UserProfile from "./components/UserProfile";
 import CreateEvent from "./components/Events/CreateEvent";
 import EventActions from "./components/OrganizerDashboard/EventActions";
+import AdminBookings from "./components/Booking/BookingListAdmin";
 import "./App.css";
 
 const App = () => {
@@ -118,6 +119,7 @@ const App = () => {
               element={<CreateEvent refreshNavbar={refreshNavbar} />}
             />
             <Route path="/events/actions/:eventId" element={<EventActions />} />
+            <Route path="/host/bookings/:eventId" element={<AdminBookings />} />
           </Routes>
         </div>
       </Router>

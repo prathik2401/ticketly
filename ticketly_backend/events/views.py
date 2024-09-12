@@ -11,7 +11,7 @@ from bookings.models import Booking
 from events.models import Event
 
 class EventPagination(PageNumberPagination):
-    page_size = 30 
+    page_size = 30  # Set the number of events per page
 
 class ListEventsView(generics.ListAPIView):
     serializer_class = EventListSerializer
@@ -19,6 +19,7 @@ class ListEventsView(generics.ListAPIView):
     pagination_class = EventPagination
     permission_classes = [AllowAny]
 
+    # Handle GET request to list events
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
@@ -29,10 +30,15 @@ class EventDetailView(generics.RetrieveAPIView):
     serializer_class = EventDetailSerializer
     permission_classes = [IsAuthenticated]
 
+    # Handle GET request to retrieve event details
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 class CreateEventView(generics.CreateAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
 
+    # Handle POST request to create a new event
     def perform_create(self, serializer):
         user = self.request.user
         event = serializer.save(user=user)
@@ -45,6 +51,7 @@ class UpdateEventView(generics.UpdateAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
 
+    # Handle PUT request to update an existing event
     def perform_update(self, serializer):
         user = self.request.user
         if not user.isHost:
@@ -55,6 +62,7 @@ class UpdateEventView(generics.UpdateAPIView):
 class EventStaffView(APIView):
     permission_classes = [IsAuthenticated]
 
+    # Handle POST request to add staff to an event
     def post(self, request, pk):
         try:
             event = Event.objects.get(id=pk)
@@ -84,6 +92,7 @@ class DeleteEventView(generics.DestroyAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
 
+    # Handle DELETE request to delete an event
     def delete(self, request, *args, **kwargs):
         user = request.user
         event = self.get_object()
@@ -109,6 +118,7 @@ class UserHostEventsView(generics.ListAPIView):
     serializer_class = EventListSerializer
     permission_classes = [IsAuthenticated]
     
+    # Get the list of events hosted by the user
     def get_queryset(self):
         user = self.request.user
         if not user.isHost:

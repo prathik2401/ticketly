@@ -6,7 +6,7 @@ import {
   updateEvent,
 } from "../../services/events/api"; // Import updateEvent
 import { toast } from "react-toastify";
-import Sidebar from "./SideBar";
+import Sidebar from "../OrganizerDashboard/SideBar";
 
 const EventActions = () => {
   const navigate = useNavigate();
@@ -16,19 +16,18 @@ const EventActions = () => {
     description: "",
     date_time: "",
     total_tickets: 1,
-    available_tickets: 1, // Add available_tickets to the state
+    available_tickets: 1,
     ticket_price: 0,
     location: "",
     location_link: "",
   });
-  const [isEditing, setIsEditing] = useState(false); // State to track edit mode
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const getEvent = async () => {
       try {
         const event = await fetchEventDetails(eventId);
         setEventData(event);
-        console.log(event);
       } catch (err) {
         console.error("Error fetching event:", err);
         toast.error("Failed to load event details. Please try again.", {
@@ -83,6 +82,10 @@ const EventActions = () => {
         autoClose: 3000,
       });
     }
+  };
+
+  const handleViewBookings = () => {
+    navigate(`/host/bookings/${eventId}`);
   };
 
   return (
@@ -208,6 +211,12 @@ const EventActions = () => {
                     className="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ease-in-out"
                   >
                     Delete Event
+                  </button>
+                  <button
+                    onClick={handleViewBookings}
+                    className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200 ease-in-out"
+                  >
+                    View Bookings
                   </button>
                 </div>
               </>

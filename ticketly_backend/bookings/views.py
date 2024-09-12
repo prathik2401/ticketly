@@ -111,3 +111,24 @@ class UserBookingsView(generics.ListAPIView):
     
     def get_queryset(self):
         return Booking.objects.filter(user=self.request.user)
+
+class AdminBookingsView(generics.ListAPIView):
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        event_id = kwargs.get('event_id')
+        try:
+            event = Event.objects.get(id=event_id)
+        except Event.DoesNotExist:
+            return Response({"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the user is either an admin or the host of the event
+        if not request.user.is_staff and request.user != event.user:
+            return Response({"error": "You are not authorized to view the bookings for this event"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Fetch all bookings for the event
+        bookings = Booking.objects.filter(event=event)
+        serializer = self.get_serializer(bookings, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -17,14 +17,15 @@ class Event(models.Model):
     image = models.ImageField(upload_to='media/images/', blank=True, null=True, storage=CustomStorage())
     staff = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='events_staff', blank=False, default=True) 
 
+    # Validates that the event date is at least 1 day from now
     def clean(self):
         if self.date_time < timezone.now() + timedelta(days=1):
             raise ValueError("The event date must be at least 1 day from now.")
-
+    # Ensures available_tickets is set to total_tickets if not provided, then saves the event.
     def save(self, *args, **kwargs):
         if self.available_tickets is None:
             self.available_tickets = self.total_tickets
         super().save(*args, **kwargs)
-
+    # Returns the name of the event as its string representation
     def __str__(self):
         return self.name

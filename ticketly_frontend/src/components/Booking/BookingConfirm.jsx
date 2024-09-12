@@ -15,10 +15,8 @@ const BookingConfirmation = () => {
       try {
         const bookingData = await fetchBookingDetails(bookingId);
         setBookingDetails(bookingData);
-        console.log(bookingData);
         const eventData = await fetchEventDetails(bookingData.event);
         setEventDetails(eventData);
-        console.log(eventData);
       } catch (err) {
         setError("Failed to fetch booking or event details.");
       } finally {

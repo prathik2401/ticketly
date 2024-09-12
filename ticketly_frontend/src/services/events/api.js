@@ -121,7 +121,6 @@ export const getUserEvents = async () => {
         Authorization: `Bearer ${localStorage.getItem("access")}`,
       },
     });
-    console.log(response.data);
     return response.data;
   } catch (error) {
     throw error.response
