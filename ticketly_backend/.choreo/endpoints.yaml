@@ -5,3 +5,10 @@ endpoints:
     type: REST
     networkVisibility: Public
     context: /
+    routes:
+      - path: /api/events/
+        description: "Endpoint for events-related operations"
+      - path: /api/bookings/
+        description: "Endpoint for booking-related operations"
+      - path: /api/accounts/
+        description: "Endpoint for user authentication and account-related operations"
