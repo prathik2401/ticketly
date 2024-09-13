@@ -31,10 +31,9 @@ Ticketly is an event booking web application that allows users to browse, book, 
     cd ticketly
     ```
 
-2. Create a virtual environment and activate it:
+2. Go to ticketly_backend and activate virual environment using:
     ```sh
-    python -m venv venv
-    venv\Scripts\activate  # On Windows
+    pipenv shell
     ```
 
 3. Install backend dependencies:
