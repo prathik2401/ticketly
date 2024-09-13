@@ -34,7 +34,11 @@ const App = () => {
     const accessToken = localStorage.getItem("access");
     if (accessToken) {
       api
-        .post("/accounts/verify-token/", { token: accessToken })
+        .post(
+          "/accounts/verify-token/",
+          { token: accessToken },
+          { headers: { Origin: "https://ticketly-mu.vercel.app" } }
+        )
         .then(() => {
           setIsLoggedIn(true);
           fetchUserProfile();

@@ -16,11 +16,11 @@ const processQueue = (error, token = null) => {
 };
 
 const api = axios.create({
-  baseURL:
-    "https://8e1f0b48-e0fb-47a5-9862-833d90622395-prod.e1-eu-north-azure.choreoapis.dev/ticketly/backend/v1.0/api/",
+  baseURL: process.env.REACT_APP_API_URL + "api/",
   timeout: 5000,
   headers: {
     "Content-Type": "application/json",
+    Origin: "https://ticketly-mu.vercel.app",
   },
 });
 
@@ -53,13 +53,13 @@ api.interceptors.response.use(
           originalRequest._retry = true;
 
           try {
-            const newAccessToken = await refreshToken(); // Refresh token API call
+            const newAccessToken = await refreshToken();
             localStorage.setItem("access", newAccessToken);
 
             api.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
             processQueue(null, newAccessToken);
 
-            return api(originalRequest); // Retry original request with new token
+            return api(originalRequest);
           } catch (refreshError) {
             processQueue(refreshError, null);
             return Promise.reject(refreshError);
@@ -79,7 +79,6 @@ api.interceptors.response.use(
           });
       }
     }
-
     return Promise.reject(error);
   }
 );

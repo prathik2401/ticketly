@@ -8,26 +8,42 @@ export const registerUser = async (
   password
 ) => {
   try {
-    const response = await api.post(`accounts/register/`, {
-      first_name,
-      last_name,
-      username,
-      email,
-      password,
-    });
+    const response = await api.post(
+      `accounts/register/`,
+      {
+        first_name,
+        last_name,
+        username,
+        email,
+        password,
+      },
+      {
+        headers: {
+          Origin: "https://ticketly-mu.vercel.app",
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error registering user:", error);
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
     try {
-      const response = await api.post(`accounts/register/`, {
-        first_name,
-        last_name,
-        username,
-        email,
-        password,
-      });
+      const response = await api.post(
+        `accounts/register/`,
+        {
+          first_name,
+          last_name,
+          username,
+          email,
+          password,
+        },
+        {
+          headers: {
+            Origin: "https://ticketly-mu.vercel.app",
+          },
+        }
+      );
       return response.data;
     } catch (retryError) {
       console.error("Retrying registration failed:", retryError);
@@ -38,10 +54,18 @@ export const registerUser = async (
 
 export const loginUser = async (email, password) => {
   try {
-    const response = await api.post("accounts/login/", {
-      email,
-      password,
-    });
+    const response = await api.post(
+      "accounts/login/",
+      {
+        email,
+        password,
+      },
+      {
+        headers: {
+          Origin: "https://ticketly-mu.vercel.app",
+        },
+      }
+    );
     window.location.reload();
     return response.data;
   } catch (error) {
@@ -55,8 +79,10 @@ export const getUserProfile = async () => {
     const refreshToken = localStorage.getItem("refresh");
     const accessToken = localStorage.getItem("access");
     const response = await api.get("accounts/user/", {
-      refresh: refreshToken,
-      access: accessToken,
+      headers: {
+        Origin: "https://ticketly-mu.vercel.app",
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
     return response.data;
   } catch (error) {
@@ -72,7 +98,15 @@ export const logoutUser = async () => {
     if (!refreshToken) {
       throw new Error("No refresh token found");
     }
-    await api.post(`accounts/logout/`, { refresh: refreshToken });
+    await api.post(
+      `accounts/logout/`,
+      { refresh: refreshToken },
+      {
+        headers: {
+          Origin: "https://ticketly-mu.vercel.app",
+        },
+      }
+    );
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
   } catch (error) {
@@ -84,9 +118,17 @@ export const logoutUser = async () => {
 export const refreshToken = async () => {
   try {
     const refresh = localStorage.getItem("refresh");
-    const response = await api.post(`accounts/token/refresh/`, {
-      refresh,
-    });
+    const response = await api.post(
+      `accounts/token/refresh/`,
+      {
+        refresh,
+      },
+      {
+        headers: {
+          Origin: "https://ticketly-mu.vercel.app",
+        },
+      }
+    );
     localStorage.setItem("access", response.data.access);
     return response.data.access;
   } catch (error) {
@@ -96,7 +138,7 @@ export const refreshToken = async () => {
 
 export const verifyHost = async () => {
   try {
-    const user = getUserProfile();
+    const user = await getUserProfile();
     return user.isHost ? true : false;
   } catch (error) {
     console.error("Error verifying host:", error);
@@ -118,6 +160,7 @@ export const updateUserProfile = async (profile) => {
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access")}`,
+          Origin: "https://ticketly-mu.vercel.app",
         },
       }
     );

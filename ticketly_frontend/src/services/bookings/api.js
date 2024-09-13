@@ -10,6 +10,7 @@ export const bookEvent = async (eventId, numberOfTickets) => {
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access")}`,
+          Origin: "https://ticketly-mu.vercel.app",
         },
       }
     );
@@ -26,6 +27,7 @@ export const fetchBookingDetails = async (bookingId) => {
     const response = await api.get(`bookings/${bookingId}/`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access")}`,
+        Origin: "https://ticketly-mu.vercel.app",
       },
     });
     return response.data;
@@ -41,6 +43,7 @@ export const fetchAllBookings = async () => {
     const response = await api.get("bookings/user/", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access")}`,
+        Origin: "https://ticketly-mu.vercel.app",
       },
     });
     return response.data;
@@ -56,6 +59,7 @@ export const adminFetchAllBookings = async (eventId) => {
     const response = await api.get(`bookings/events/${eventId}/`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access")}`,
+        Origin: "https://ticketly-mu.vercel.app",
       },
     });
     return response.data;
